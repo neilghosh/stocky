@@ -18,15 +18,20 @@ import re
 import json
 import urllib
 import csv, io
+import logging
+from auth import Auth
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
+        if not Auth().validate_key(self.request):
+            self.response.status = 401
+            return
         name = self.request.get("name")
         url = 'https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/ajaxCompanySearch.jsp?search='+name.replace(" ", "%20")
-        print url
+        logging.info(url)
         try:
             result = urlfetch.fetch(url)
-            print result
+            logging.info(result)
             if result.status_code == 200:
             	# regex = "itpFlag=0(.*?)<span class='symbol'"
             	regex = "(symbol=.*?&illiquid).*?(itpFlag=0'>.*?<span)"
@@ -44,19 +49,22 @@ class MainPage(webapp2.RequestHandler):
 
 class QuotePage(webapp2.RequestHandler):
     def get(self):
+        if not Auth().validate_key(self.request):
+            self.response.status = 401
+            return
         name = self.request.get("name")
         ## url = 'https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/ajaxGetQuoteJSON.jsp?symbol='+name.replace(" ", "%20")+'&series=EQ'
         url = 'https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/GetQuote.jsp?symbol='+name.replace(" ", "%20")+'&illiquid=0&smeFlag=0&itpFlag=0'
-        print url
+        logging.info(url)
         try:
             result = urlfetch.fetch(url)
-            print result
+            logging.info(result)
             if result.status_code == 200:
                 regex = '{"futLink".*'
                 pattern = re.compile(regex)
                 data = re.findall(pattern, result.content)
                 jsonData = json.loads(data[0])
-                print jsonData
+                logging.info(jsonData)
                 self.response.write(json.dumps(jsonData['data'][0]))
             else:
                 self.response.status_code = result.status_code
@@ -66,6 +74,9 @@ class QuotePage(webapp2.RequestHandler):
 
 class HistoricalDataPage(webapp2.RequestHandler):
     def get(self):
+        if not Auth().validate_key(self.request):
+            self.response.status = 401
+            return
         name = self.request.get("name")
         startDate = self.request.get("startdate")
         endDate = self.request.get("enddate")
@@ -76,15 +87,15 @@ class HistoricalDataPage(webapp2.RequestHandler):
         ##url = 'https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/getHistoricalData.jsp?symbol='+name+'&series=EQ&fromDate=01-Jul-2017&toDate=13-Jul-2017'
         url = 'https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/getHistoricalData.jsp?symbol='+name+'&series=EQ&fromDate='+startDate+'&toDate='+endDate+'&datePeriod='+datePeriod+''
         ## http://localhost:8080/getdata?name=TCS&startdate=01-07-2016&enddate=18-07-2017&dateperiod=3months
-        print url
+        logging.info(url)
         try:
             result = urlfetch.fetch(url)
-            print result
+            logging.info(result)
             if result.status_code == 200:
                 regex = '"Date".*:'
                 pattern = re.compile(regex)
                 data = re.findall(pattern, result.content)[0].replace(':','\n')
-                print data
+                logging.info(data)
                 ##fieldnames = ("Date","Symbol","Series","Open Price","High Price","Low Price","Last Traded Price ","Close Price","Total Traded Quantity","Turnover (in Lakhs)")
                 reader = csv.DictReader(io.StringIO(unicode(data)))
                 json_data = json.dumps(list(reader))
@@ -98,7 +109,7 @@ class HistoricalDataPage(webapp2.RequestHandler):
 
 
 app = webapp2.WSGIApplication([
-    ('/companysearch', MainPage),
-    ('/getquote', QuotePage),
-    ('/getdata', HistoricalDataPage),
+    ('/api/companysearch', MainPage),
+    ('/api/getquote', QuotePage),
+    ('/api/getdata', HistoricalDataPage),
 ], debug=True)
