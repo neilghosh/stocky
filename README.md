@@ -1,4 +1,8 @@
 # stocky
+## Setup
+pip install -t lib -r requirements.txt
+
+
 ## APIs
 ### Get list of companies with their ticker symbol for a partial company name.
 > /companysearch?name=infosys

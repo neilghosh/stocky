@@ -1,0 +1,5 @@
+#pip install --upgrade google-cloud
+#pip install webapp2
+Flask==2.0.2
+pip install --upgrade google-cloud-datastore
+ 
