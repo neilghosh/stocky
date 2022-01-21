@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from flask import Flask
-from flask import request
-import requests
-import re
-import json
 import csv
-import logging
-from auth import Auth
 import io
+import json
+import logging
+import re
+
+import requests
+from flask import Flask, request
+
+from auth import Auth
 
 app = Flask(__name__)
 
@@ -36,7 +37,7 @@ def get_company_info():
     logging.info(url)
     print(url)
     try:
-        #NSE needs these headers
+        # NSE needs these headers
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
                    'accept': 'application/json', 'accept-encoding': 'gzip, deflate', 'accept-language': 'en-US,en;q=0.8'}
 
@@ -51,20 +52,20 @@ def get_company_info():
                 companies[x[7:][:-9]
                           ] = y[11:].replace('<b >', '').replace('</b>', '')[:-5]
                 ## names.append(name[6:].replace('<b >','').replace('</b>',''))
-                headers = {'Content-Type':'application/json'}
+                headers = {'Content-Type': 'application/json'}
             return json.dumps(companies), 200, headers
         else:
             return "", result.status_code
     except (requests.exceptions.RequestException, requests.exceptions.Timeout) as ex:
         logging.exception('Caught exception fetching url')
-        return "", 500    
+        return "", 500
     except Exception as e:
         return "{}", 500
 
 
 @app.route("/api/getquote")
 def get_quote():
-    if not Auth().validate_key(request):        
+    if not Auth().validate_key(request):
         return "", 401
     name = request.args["name"]
     ## url = 'https://www.nseindia.com/live_market/dynaContent/live_watch/get_quote/ajaxGetQuoteJSON.jsp?symbol='+name.replace(" ", "%20")+'&series=EQ'
@@ -82,8 +83,8 @@ def get_quote():
         if result.status_code == 200:
             regex = '{"tradedDate".*'
             pattern = re.compile(regex)
-            ## print(result.text)
-            data = re.findall(pattern, result.text)            
+            # print(result.text)
+            data = re.findall(pattern, result.text)
             jsonData = json.loads(data[0])
             logging.info(jsonData)
             return json.dumps(jsonData['data'][0])
@@ -96,7 +97,7 @@ def get_quote():
 
 @app.route("/api/getdata")
 def get_data():
-    if not Auth().validate_key(request):        
+    if not Auth().validate_key(request):
         return 401
     name = request.args["name"]
     startDate = request.args["startdate"]
