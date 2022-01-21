@@ -37,11 +37,8 @@ def get_company_info():
     logging.info(url)
     print(url)
     try:
-        # NSE needs these headers
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-                   'accept': 'application/json', 'accept-encoding': 'gzip, deflate', 'accept-language': 'en-US,en;q=0.8'}
+        result = make_http_request(url)
 
-        result = requests.get(url=url, headers=headers, timeout=5)
         logging.info(result)
         if result.status_code == 200:
             # regex = "itpFlag=0(.*?)<span class='symbol'"
@@ -74,10 +71,7 @@ def get_quote():
     print(url)
     logging.info(url)
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-                   'accept': 'application/json', 'accept-encoding': 'gzip, deflate', 'accept-language': 'en-US,en;q=0.8'}
-
-        result = requests.get(url=url, headers=headers, timeout=5)
+        result = make_http_request(url)
 
         logging.info(result)
         if result.status_code == 200:
@@ -113,10 +107,7 @@ def get_data():
     # http://localhost:8080/getdata?name=TCS&startdate=01-07-2016&enddate=18-07-2017&dateperiod=3months
     logging.info(url)
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-                   'accept': 'application/json', 'accept-encoding': 'gzip, deflate', 'accept-language': 'en-US,en;q=0.8'}
-
-        result = requests.get(url=url, headers=headers, timeout=5)
+        result = make_http_request(url)
         logging.info(result)
         if result.status_code == 200:
             regex = '"Date".*:'
@@ -129,10 +120,22 @@ def get_data():
             json_data = json.dumps(list(reader))
             return json_data
         else:
+            print(result.headers)
             return "", result.status_code
     except requests.exceptions.RequestException:
         logging.exception('Caught exception fetching url')
+        print(result.headers)
+
     ##self.response.headers['Content-Type'] = 'application/json'
+
+
+def make_http_request(url):
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+                   'accept': 'application/json', 'accept-encoding': 'gzip, deflate', 'accept-language': 'en-US,en;q=0.8'}
+
+    result = requests.get(url=url, headers=headers, timeout=10)
+    print(result.headers)
+    return result
 
 
 if __name__ == '__main__':

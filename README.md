@@ -1,11 +1,15 @@
 # stocky
 ## Setup
+```
 pip install -t lib -r requirements.txt
-
-
+```
+## Start Server 
+```
+python main.py
+```
 ## APIs
 ### Get list of companies with their ticker symbol for a partial company name.
-> /companysearch?name=infosys
+> api/companysearch?name=infosys
 #### Example
 ```bash
 curl -X GET \
@@ -20,11 +24,11 @@ curl -X GET \
 }
 ```
 ### Get all the latest data for a specific ticker symbol.
-> /getquote?name=INFY
+> api/getquote?name=INFY
 #### Example
 ``` bash
 curl -X GET \
-  'https://trade-junky.appspot.com/api/getquote?name=INFY' \
+  'http://localhost:8080/api/getquote?name=INFY' \
   -H 'api-key: 2246696acd8638f0fbfe5d6e4d515a3eaefed5c19b5a2c18'
 ```
 ##### Response
