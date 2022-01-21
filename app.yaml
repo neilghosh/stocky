@@ -1,7 +1,5 @@
-runtime: python27
-api_version: 1
-threadsafe: true
-
+runtime: python39
+service: trade-junky
 handlers:
 - url: /admin/.*
   script: admin.app
